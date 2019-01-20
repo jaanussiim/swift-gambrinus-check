@@ -14,4 +14,28 @@
  * limitations under the License.
  */
 
-print("Hello, world!")
+import TalkToCloud
+import SWLogger
+
+class CloudLogger: TalkToCloud.Logger {
+    func error<T>(_ object: T, file: String, function: String, line: Int) {
+        Log.error(object, file: file, function: function, line: line)
+    }
+    
+    func verbose<T>(_ object: T, file: String, function: String, line: Int) {
+        Log.verbose(object, file: file, function: function, line: line)
+    }
+    
+    func log<T>(_ object: T, file: String, function: String, line: Int) {
+        Log.debug(object, file: file, function: function, line: line)
+    }
+}
+
+Log.add(output: ConsoleOutput())
+Log.logLevel = .debug
+
+TalkToCloud.Logging.set(logger: CloudLogger())
+
+let commander = Commander<Check>(containerId: "com.coodly.gambrinus", arguments: CommandLine.arguments)
+commander.run()
+

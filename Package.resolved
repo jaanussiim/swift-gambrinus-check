@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "SWLogger",
+        "repositoryURL": "https://github.com/coodly/swlogger.git",
+        "state": {
+          "branch": null,
+          "revision": "6f98c0136e10c1d8612197584171dc359110b4e5",
+          "version": "0.3.5"
+        }
+      },
+      {
+        "package": "TalkToCloud",
+        "repositoryURL": "git@github.com:coodly/TalkToCloud.git",
+        "state": {
+          "branch": null,
+          "revision": "a7fbf67dd463f1295eb4ab34e23a14240fd33ab9",
+          "version": "0.8.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
