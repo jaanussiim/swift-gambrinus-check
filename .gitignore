@@ -3,3 +3,4 @@
 /Packages
 /*.xcodeproj
 Config
+Sources/GambrinusCheck/Secrets.swift

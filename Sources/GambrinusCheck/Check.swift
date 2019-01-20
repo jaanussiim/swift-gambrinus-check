@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
+import Foundation
 import TalkToCloud
+import BloggerAPI
+import SWLogger
 
 internal class Check: Command, ContainerConsumer {
     var container: CloudContainer!
     
+    private lazy var blogger = Blogger(blogURL: "http://tartugambrinus.blogspot.com", key: BloggerAPIKey, fetch: BloggerFetch())
+
     required init() {}
     
     func execute(with arguments: [String]) {
+        Log.debug("Fetch posts")
+        blogger.fetchUpdates(after: Date.distantPast, completion: handlePosts(result:))
+    }
     
+    private func handlePosts(result: PostsListResult) {
+        if let error = result.error {
+            Log.error("Fetch posts error: \(error)")
+        } else if let post = result.posts?.last {
+            Log.debug("Latest post: \(post)")
+        } else {
+            Log.debug("Wut?")
+        }
     }
 }

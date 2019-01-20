@@ -2,6 +2,15 @@
   "object": {
     "pins": [
       {
+        "package": "BloggerAPI",
+        "repositoryURL": "git@github.com:coodly/BloggerAPI.git",
+        "state": {
+          "branch": null,
+          "revision": "a5c7af66fa41ee8ea01afaf7b4f9ca9952508cd5",
+          "version": "0.1.0"
+        }
+      },
+      {
         "package": "SWLogger",
         "repositoryURL": "https://github.com/coodly/swlogger.git",
         "state": {
