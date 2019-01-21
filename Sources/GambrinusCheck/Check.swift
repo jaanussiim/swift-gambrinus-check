@@ -19,6 +19,10 @@ import TalkToCloud
 import BloggerAPI
 import SWLogger
 
+private struct Known: Codable {
+    let date: Date
+}
+
 internal class Check: Command, ContainerConsumer {
     var container: CloudContainer!
     
@@ -27,8 +31,13 @@ internal class Check: Command, ContainerConsumer {
     required init() {}
     
     func execute(with arguments: [String]) {
-        Log.debug("Fetch posts")
-        blogger.fetchUpdates(after: Date.distantPast, completion: handlePosts(result:))
+        if arguments.contains("--force") {
+            Log.debug("Force update marker")
+            pushUpdateMarker()
+        } else {
+            Log.debug("Fetch posts")
+            blogger.fetchUpdates(after: Date.distantPast, completion: handlePosts(result:))
+        }
     }
     
     private func handlePosts(result: PostsListResult) {
@@ -36,8 +45,39 @@ internal class Check: Command, ContainerConsumer {
             Log.error("Fetch posts error: \(error)")
         } else if let post = result.posts?.last {
             Log.debug("Latest post: \(post)")
+            checkHaveUpdates(post)
         } else {
             Log.debug("Wut?")
         }
+    }
+    
+    private func checkHaveUpdates(_ post: Post) {
+        let known = latestKnown()
+        guard post.published > known.date else {
+            Log.debug("No updates")
+            return
+        }
+        
+        Log.debug("Have new post")
+        pushUpdateMarker()
+    }
+    
+    private func pushUpdateMarker() {
+        Log.debug("Push update marker")
+    }
+    
+    private func latestKnown() -> Known {
+        guard let data = try? Data(contentsOf: URL(fileURLWithPath: "latest-known.json")) else {
+            Log.debug("No data")
+            return Known(date: Date.distantPast)
+        }
+        
+        let decoder = JSONDecoder()
+        guard let decoded = try? decoder.decode(Known.self, from: data) else {
+            Log.debug("No decode")
+            return Known(date: Date.distantPast)
+        }
+        
+        return decoded
     }
 }
