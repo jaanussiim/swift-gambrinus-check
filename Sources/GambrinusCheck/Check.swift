@@ -23,6 +23,7 @@ private struct Known: Codable {
     let date: Date
 }
 
+@available(OSX 10.12, *)
 internal class Check: Command, ContainerConsumer {
     var container: CloudContainer!
     
@@ -64,6 +65,47 @@ internal class Check: Command, ContainerConsumer {
     
     private func pushUpdateMarker() {
         Log.debug("Push update marker")
+        var modification: Modification? = nil
+        let fetchHandler: ((CloudResult<Modification>) -> Void) = {
+            result in
+            
+            if let error = result.error {
+                Log.error("Fetch modification record error: \(error)")
+                
+                return
+            }
+            
+            modification = result.records.first
+        }
+        
+        container.fetch(completion: fetchHandler)
+        
+        
+        var saved: Modification
+        if let remote = modification {
+            Log.debug("Updating existing marker")
+            saved = remote
+        } else {
+            Log.debug("Creating new marker")
+            saved = Modification()
+        }
+        
+        saved.markedAt = Date()
+        
+        let saveHandler: ((CloudResult<Modification>) -> Void) = {
+            result in
+            
+            if let error = result.error {
+                Log.error("Marker save error: \(error)")
+            } else if let record = result.records.first {
+                Log.debug("Marker saved")
+                self.mark(lastKnown: record.markedAt!)
+            } else {
+                Log.debug("Wut?")
+            }
+        }
+        
+        container.save(records: [saved], completion: saveHandler)
     }
     
     private func latestKnown() -> Known {
@@ -73,11 +115,24 @@ internal class Check: Command, ContainerConsumer {
         }
         
         let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
         guard let decoded = try? decoder.decode(Known.self, from: data) else {
             Log.debug("No decode")
             return Known(date: Date.distantPast)
         }
         
         return decoded
+    }
+    
+    private func mark(lastKnown: Date) {
+        let known = Known(date: lastKnown)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        do {
+            let data = try encoder.encode(known)
+            try data.write(to: URL(fileURLWithPath: "latest-known.json"))
+        } catch {
+            Log.error("Mark known error: \(error)")
+        }
     }
 }

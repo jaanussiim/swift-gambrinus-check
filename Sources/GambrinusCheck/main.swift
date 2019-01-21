@@ -52,6 +52,8 @@ Log.logLevel = .debug
 TalkToCloud.Logging.set(logger: CloudLogger())
 BloggerAPI.Logging.set(logger: BloggerLogger())
 
-let commander = Commander<Check>(containerId: "com.coodly.gambrinus", arguments: CommandLine.arguments)
-commander.run()
+if #available(OSX 10.12, *) {
+    let commander = Commander<Check>(containerId: "com.coodly.gambrinus", arguments: CommandLine.arguments)
+    commander.run()
+}
 

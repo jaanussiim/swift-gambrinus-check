@@ -4,3 +4,4 @@
 /*.xcodeproj
 Config
 Sources/GambrinusCheck/Secrets.swift
+latest-known.json
